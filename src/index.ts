@@ -6,6 +6,7 @@ import type { Application, Request, Response } from "express";
 import cors from "cors";
 import productRoutes from "./routes/product.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
+import authRoutes from "./routes/auth.routes.js";
 const app: Application = express();
 const port: number = 4000;
 
@@ -18,7 +19,8 @@ app.use((req, res, next) => {
 });
 
 app.use("/products", productRoutes);
-app.use("/api/category", categoryRoutes);
+app.use("/category", categoryRoutes);
+app.use("/auth", authRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, World!");
