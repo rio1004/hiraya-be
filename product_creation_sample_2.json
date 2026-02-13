@@ -1,0 +1,26 @@
+{
+  "name": "Minimalist Card Holder",
+  "description": "A sleek and slim card holder for the modern individual.",
+  "categoryId": "clspq2j2800003b62f7e34f8a",
+  "imgSrc": "https://example.com/images/minimalist-cardholder.jpg",
+  "variants": [
+    {
+      "color": "Navy Blue",
+      "texture": "Saffiano Leather",
+      "walletType": "CARDHOLDER",
+      "price": 35.00,
+      "stock": 200,
+      "availability": "IN_STOCK",
+      "sku": "MCH-NAV-SAF-CH"
+    },
+    {
+      "color": "Gray",
+      "texture": "Saffiano Leather",
+      "walletType": "CARDHOLDER",
+      "price": 35.00,
+      "stock": 180,
+      "availability": "IN_STOCK",
+      "sku": "MCH-GRY-SAF-CH"
+    }
+  ]
+}

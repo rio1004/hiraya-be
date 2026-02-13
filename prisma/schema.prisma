@@ -1,0 +1,104 @@
+generator client {
+  provider        = "prisma-client-js"
+  moduleFormat    = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum WalletType {
+  BIFOLD
+  TRIFOLD
+  LONG
+  CARDHOLDER
+}
+
+enum AvailabilityStatus {
+  IN_STOCK
+  OUT_OF_STOCK
+  PREORDER
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  carts     Cart[]
+  orders    Order[]
+  createdAt DateTime @default(now())
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String
+  products  Product[]
+  createdAt DateTime  @default(now())
+}
+
+model Product {
+  id          String           @id @default(uuid())
+  name        String
+  description String?
+  isActive    Boolean          @default(true)
+  categoryId  String
+  category    Category         @relation(fields: [categoryId], references: [id])
+  variants    ProductVariant[]
+  createdAt   DateTime         @default(now())
+}
+
+model ProductVariant {
+  id           String              @id @default(uuid())
+  productId    String
+  product      Product             @relation(fields: [productId], references: [id])
+
+  color        String
+  texture      String
+  walletType   WalletType
+  price        Decimal             @db.Decimal(10, 2)
+  stock        Int                 @default(0)
+  availability AvailabilityStatus
+  sku          String?             @unique
+  imgSrc       String?             // 👈 moved here
+  cartItems    CartItem[]
+  orderItems   OrderItem[]
+  createdAt    DateTime            @default(now())
+}
+
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+}
+
+model CartItem {
+  id        String         @id @default(uuid())
+  cartId   String
+  cart     Cart           @relation(fields: [cartId], references: [id])
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+  quantity Int             @default(1)
+}
+
+model Order {
+  id        String      @id @default(uuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  items     OrderItem[]
+  status    String
+  total     Decimal     @db.Decimal(10, 2)
+  createdAt DateTime    @default(now())
+}
+
+model OrderItem {
+  id         String          @id @default(uuid())
+  orderId   String
+  order     Order           @relation(fields: [orderId], references: [id])
+  variantId String
+  variant   ProductVariant  @relation(fields: [variantId], references: [id])
+  quantity  Int
+  price     Decimal         @db.Decimal(10, 2)
+}

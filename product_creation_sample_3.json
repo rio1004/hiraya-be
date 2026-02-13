@@ -1,0 +1,17 @@
+{
+  "name": "Traveler's Trifold Wallet",
+  "description": "A spacious trifold wallet perfect for travel.",
+  "categoryId": "clspq2j2800003b62f7e34f8a",
+  "imgSrc": "https://example.com/images/travelers-trifold.jpg",
+  "variants": [
+    {
+      "color": "Dark Green",
+      "texture": "Pebbled Leather",
+      "walletType": "TRIFOLD",
+      "price": 95.00,
+      "stock": 80,
+      "availability": "IN_STOCK",
+      "sku": "TTW-DGR-PEB-TF"
+    }
+  ]
+}

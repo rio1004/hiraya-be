@@ -1,0 +1,17 @@
+{
+  "name": "Executive Long Wallet",
+  "description": "An elegant long wallet for the discerning professional.",
+  "categoryId": "clspq2j2800003b62f7e34f8a",
+  "imgSrc": "https://example.com/images/executive-long-wallet.jpg",
+  "variants": [
+    {
+      "color": "Burgundy",
+      "texture": "Crossgrain Leather",
+      "walletType": "LONG",
+      "price": 120.00,
+      "stock": 60,
+      "availability": "PREORDER",
+      "sku": "ELW-BUR-CRO-LN"
+    }
+  ]
+}

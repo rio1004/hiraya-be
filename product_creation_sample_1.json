@@ -1,0 +1,17 @@
+{
+  "name": "Classic Leather Belt",
+  "description": "A timeless leather belt for any occasion.",
+  "categoryId": "clspq2j2800003b62f7e34f8a", 
+  "imgSrc": "https://example.com/images/classic-belt.jpg",
+  "variants": [
+    {
+      "color": "Brown",
+      "texture": "Smooth Leather",
+      "walletType": "CARDHOLDER",
+      "price": 49.99,
+      "stock": 150,
+      "availability": "IN_STOCK",
+      "sku": "CLB-BRO-SMO-CH"
+    }
+  ]
+}

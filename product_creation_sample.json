@@ -1,0 +1,26 @@
+{
+  "name": "Luxury Leather Wallet",
+  "description": "A high-quality leather wallet with multiple compartments.",
+  "categoryId": "clspq2j2800003b62f7e34f8a", 
+  "imgSrc": "https://example.com/images/luxury-wallet.jpg",
+  "variants": [
+    {
+      "color": "Black",
+      "texture": "Smooth Leather",
+      "walletType": "BIFOLD",
+      "price": 75.99,
+      "stock": 100,
+      "availability": "IN_STOCK",
+      "sku": "LLW-BLK-SMO-BF"
+    },
+    {
+      "color": "Brown",
+      "texture": "Grainy Leather",
+      "walletType": "TRIFOLD",
+      "price": 85.50,
+      "stock": 50,
+      "availability": "IN_STOCK",
+      "sku": "LLW-BRO-GRA-TF"
+    }
+  ]
+}

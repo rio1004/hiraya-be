@@ -1,0 +1,17 @@
+{
+  "name": "Adventurer's Bifold Wallet",
+  "description": "A rugged bifold wallet for everyday adventures.",
+  "categoryId": "clspq2j2800003b62f7e34f8a",
+  "imgSrc": "https://example.com/images/adventurer-bifold.jpg",
+  "variants": [
+    {
+      "color": "Tan",
+      "texture": "Distressed Leather",
+      "walletType": "BIFOLD",
+      "price": 65.00,
+      "stock": 0,
+      "availability": "OUT_OF_STOCK",
+      "sku": "ABW-TAN-DIS-BF"
+    }
+  ]
+}
