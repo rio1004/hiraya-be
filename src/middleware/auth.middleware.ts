@@ -1,12 +1,9 @@
 import type { NextFunction, Request, Response } from "express";
 import admin from "../config/firebaseAdmin.js";
-
-export interface AuthRequest extends Request {
-  user?: any;
-}
+import prisma from "../util/prisma.js";
 
 export const verifyFirebaseToken = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) => {
@@ -28,7 +25,26 @@ export const verifyFirebaseToken = async (
 
   try {
     const decoded = await admin.auth().verifyIdToken(token);
-    req.user = decoded;
+    let user = await prisma.user.findUnique({
+      where: { firebaseUid: decoded.uid },
+    });
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          firebaseUid: decoded.uid,
+          email: decoded.email || "",
+          name: decoded.name || "",
+        },
+      });
+    }
+    req.user = {
+      id: user.id,
+      firebaseUid: user.firebaseUid!,
+      email: user.email,
+      role: user.role,
+      uid: decoded.uid,
+    };
     next();
   } catch (error) {
     return res.status(401).json({ message: "Invalid token" });

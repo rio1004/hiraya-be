@@ -1,11 +1,12 @@
-import type { Response } from "express";
-import type { AuthRequest } from "../middleware/auth.middleware.js";
+import type { Request, Response } from "express";
 import prisma from "../util/prisma.js";
 import jwt from "jsonwebtoken";
 
-export const syncUser = async (req: AuthRequest, res: Response) => {
+export const syncUser = async (req: Request, res: Response) => {
   try {
-    const { uid, email, name } = req.user;
+    const { email } = req.user;
+    const name = req.user.name ?? null;
+    const uid = req.user.uid ?? null;
 
     const user = await prisma.user.upsert({
       where: { firebaseUid: uid },

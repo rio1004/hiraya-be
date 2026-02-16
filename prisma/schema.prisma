@@ -68,7 +68,7 @@ model ProductVariant {
 }
 model Cart {
   id        String     @id @default(uuid())
-  userId    String
+  userId    String     @unique
   user      User       @relation(fields: [userId], references: [id])
   items     CartItem[]
   createdAt DateTime   @default(now())
@@ -81,6 +81,8 @@ model CartItem {
   variantId String
   variant   ProductVariant @relation(fields: [variantId], references: [id])
   quantity Int             @default(1)
+
+  @@unique([cartId, variantId])
 }
 
 model Order {
