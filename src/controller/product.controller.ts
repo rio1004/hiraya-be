@@ -6,13 +6,10 @@ export const ProductController = {
   async createProduct(req: Request, res: Response) {
     try {
       const { name, description, categoryId, variants } = req.body;
-
       if (!name || !categoryId || !variants || !Array.isArray(variants)) {
-        return res
-          .status(400)
-          .json({
-            message: "Missing required product fields or variants array",
-          });
+        return res.status(400).json({
+          message: "Missing required product fields or variants array",
+        });
       }
 
       // Basic validation for variants
@@ -35,15 +32,19 @@ export const ProductController = {
             .json({ message: `Invalid WalletType: ${variant.walletType}` });
         }
         if (!Object.values(AvailabilityStatus).includes(variant.availability)) {
-          return res
-            .status(400)
-            .json({
-              message: `Invalid AvailabilityStatus: ${variant.availability}`,
-            });
+          return res.status(400).json({
+            message: `Invalid AvailabilityStatus: ${variant.availability}`,
+          });
         }
         // Ensure imgSrc is part of the variant if present
-        if (variant.imgSrc !== undefined && typeof variant.imgSrc !== 'string' && variant.imgSrc !== null) {
-          return res.status(400).json({ message: "Invalid imgSrc type in variant" });
+        if (
+          variant.imgSrc !== undefined &&
+          typeof variant.imgSrc !== "string" &&
+          variant.imgSrc !== null
+        ) {
+          return res
+            .status(400)
+            .json({ message: "Invalid imgSrc type in variant" });
         }
       }
 
@@ -101,7 +102,7 @@ export const ProductController = {
   async getProductById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      if (typeof id !== 'string') {
+      if (typeof id !== "string") {
         return res.status(400).json({ message: "Invalid product ID provided" });
       }
       const product = await ProductService.getProductById(id);
@@ -121,7 +122,7 @@ export const ProductController = {
   async updateProduct(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      if (typeof id !== 'string') {
+      if (typeof id !== "string") {
         return res.status(400).json({ message: "Invalid product ID provided" });
       }
       const { name, description, isActive, categoryId, variants } = req.body;
@@ -144,15 +145,19 @@ export const ProductController = {
             variant.availability &&
             !Object.values(AvailabilityStatus).includes(variant.availability)
           ) {
-            return res
-              .status(400)
-              .json({
-                message: `Invalid AvailabilityStatus: ${variant.availability}`,
-              });
+            return res.status(400).json({
+              message: `Invalid AvailabilityStatus: ${variant.availability}`,
+            });
           }
           // Ensure imgSrc is part of the variant if present
-          if (variant.imgSrc !== undefined && typeof variant.imgSrc !== 'string' && variant.imgSrc !== null) {
-            return res.status(400).json({ message: "Invalid imgSrc type in variant" });
+          if (
+            variant.imgSrc !== undefined &&
+            typeof variant.imgSrc !== "string" &&
+            variant.imgSrc !== null
+          ) {
+            return res
+              .status(400)
+              .json({ message: "Invalid imgSrc type in variant" });
           }
         }
       }
@@ -183,7 +188,7 @@ export const ProductController = {
   async deleteProduct(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      if (typeof id !== 'string') {
+      if (typeof id !== "string") {
         return res.status(400).json({ message: "Invalid product ID provided" });
       }
       const deletedProduct = await ProductService.deleteProduct(id);
@@ -193,12 +198,10 @@ export const ProductController = {
           .status(404)
           .json({ message: "Product not found for deletion" });
       }
-      res
-        .status(200)
-        .json({
-          message: "Product deleted successfully",
-          product: deletedProduct,
-        });
+      res.status(200).json({
+        message: "Product deleted successfully",
+        product: deletedProduct,
+      });
     } catch (error: any) {
       console.error("Error deleting product:", error);
       res

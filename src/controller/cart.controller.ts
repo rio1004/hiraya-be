@@ -24,5 +24,16 @@ export const CartController = {
     }
   },
 
-  async getCartQty(req: Request, res: Response) {},
+  async getCartQty(req: Request, res: Response) {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const userId = req.user.id;
+      const qty = await CartService.getCartQty(userId);
+
+      res.status(200).json({ qty });
+    } catch (error) {}
+  },
 };

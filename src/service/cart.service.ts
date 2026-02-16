@@ -55,4 +55,35 @@ export const CartService = {
     });
     return updateCart;
   },
+
+  async getCartQty(userId: string) {
+    const cart = await prisma.cart.findUnique({
+      where: { userId },
+      select: {
+        id: true,
+        items: {
+          select: {
+            quantity: true,
+          },
+        },
+      },
+    });
+
+    let totalQuantity = 0;
+
+    if (cart) {
+      const sum = await prisma.cartItem.aggregate({
+        _sum: {
+          quantity: true,
+        },
+        where: { cartId: cart.id },
+      });
+
+      totalQuantity = sum._sum.quantity || 0;
+    }
+
+    return {
+      totalQuantity,
+    };
+  },
 };
