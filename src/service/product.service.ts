@@ -112,10 +112,21 @@ export const ProductService = {
       },
     });
 
+    const productsWithColors = products.map((product) => {
+      const colors = [
+        ...new Set(product.variants.map((variant) => variant.color)),
+      ];
+
+      return {
+        ...product,
+        colors,
+      };
+    });
+
     const totalProducts = await prisma.product.count({ where });
 
     return {
-      products,
+      products: productsWithColors,
       currentPage: page,
       pageSize,
       totalProducts,

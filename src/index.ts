@@ -8,6 +8,7 @@ import productRoutes from "./routes/product.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
+import productVariantRoutes from "./routes/product-variant.routes.js";
 const app: Application = express();
 const port: number = 4000;
 
@@ -22,6 +23,7 @@ app.use((req, res, next) => {
 app.use("/products", productRoutes);
 app.use("/category", categoryRoutes);
 app.use("/cart", cartRoutes);
+app.use("/product-variant", productVariantRoutes);
 app.use("/auth", authRoutes);
 
 app.get("/", (req: Request, res: Response) => {
