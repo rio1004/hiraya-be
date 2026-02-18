@@ -1,7 +1,6 @@
 import type { Request, Response } from "express";
 import { ProductService } from "../service/product.service.js";
-import { AvailabilityStatus, WalletType } from "@prisma/client";
-import { AvailabilityStatusValues, WalletTypeValues } from "../types/enum.js";
+import { AvailabilityStatusValues, WalletTypeValues, type WalletType } from "../types/enum.js";
 
 export const ProductController = {
   async createProduct(req: Request, res: Response) {
@@ -140,7 +139,7 @@ export const ProductController = {
         for (const variant of variants) {
           if (
             variant.walletType &&
-            !Object.values(WalletType).includes(variant.walletType)
+            !Object.values(WalletTypeValues).includes(variant.walletType)
           ) {
             return res
               .status(400)
