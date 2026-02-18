@@ -1,5 +1,5 @@
+import { AvailabilityStatusValues, type AvailabilityStatus, type WalletType } from "../types/enum.js";
 import prisma from "../util/prisma.js";
-import { AvailabilityStatus, WalletType } from "@prisma/client";
 
 export const ProductService = {
   // Create a new product
@@ -85,7 +85,7 @@ export const ProductService = {
       where.variants = {
         some: {
           stock: { gt: 0 },
-          availability: inStock ? AvailabilityStatus.IN_STOCK : undefined,
+          availability: inStock ? AvailabilityStatusValues.IN_STOCK : undefined,
         },
       };
     }

@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { ProductService } from "../service/product.service.js";
 import { AvailabilityStatus, WalletType } from "@prisma/client";
+import { AvailabilityStatusValues, WalletTypeValues } from "../types/enum.js";
 
 export const ProductController = {
   async createProduct(req: Request, res: Response) {
@@ -26,12 +27,16 @@ export const ProductController = {
             .status(400)
             .json({ message: "Invalid variant data provided" });
         }
-        if (!Object.values(WalletType).includes(variant.walletType)) {
+        if (!Object.values(WalletTypeValues).includes(variant.walletType)) {
           return res
             .status(400)
             .json({ message: `Invalid WalletType: ${variant.walletType}` });
         }
-        if (!Object.values(AvailabilityStatus).includes(variant.availability)) {
+        if (
+          !Object.values(AvailabilityStatusValues).includes(
+            variant.availability,
+          )
+        ) {
           return res.status(400).json({
             message: `Invalid AvailabilityStatus: ${variant.availability}`,
           });
@@ -143,7 +148,9 @@ export const ProductController = {
           }
           if (
             variant.availability &&
-            !Object.values(AvailabilityStatus).includes(variant.availability)
+            !Object.values(AvailabilityStatusValues).includes(
+              variant.availability,
+            )
           ) {
             return res.status(400).json({
               message: `Invalid AvailabilityStatus: ${variant.availability}`,

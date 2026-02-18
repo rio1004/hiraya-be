@@ -1,4 +1,4 @@
-import type { AvailabilityStatus, WalletType } from "@prisma/client";
+import type { AvailabilityStatus, WalletType } from "../types/enum.js";
 import prisma from "../util/prisma.js";
 
 export const ProductVariantService = {

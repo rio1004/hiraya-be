@@ -1,10 +1,95 @@
 generator client {
-  provider        = "prisma-client-js"
-  moduleFormat    = "esm"
+  provider     = "prisma-client-js"
+  moduleFormat = "esm"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  name        String?
+  createdAt   DateTime @default(now())
+  firebaseUid String?  @unique
+  role        Role     @default(CUSTOMER)
+  carts       Cart?
+  orders      Order[]
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String
+  createdAt DateTime  @default(now())
+  products  Product[]
+}
+
+model Product {
+  id          String           @id @default(uuid())
+  name        String
+  description String?
+  isActive    Boolean          @default(true)
+  categoryId  String
+  createdAt   DateTime         @default(now())
+  category    Category         @relation(fields: [categoryId], references: [id])
+  variants    ProductVariant[]
+}
+
+model ProductVariant {
+  id           String             @id @default(uuid())
+  productId    String
+  color        String
+  texture      String
+  walletType   WalletType
+  price        Decimal            @db.Decimal(10, 2)
+  stock        Int                @default(0)
+  availability AvailabilityStatus
+  sku          String?            @unique
+  createdAt    DateTime           @default(now())
+  imgSrc       String?
+  cartItems    CartItem[]
+  orderItems   OrderItem[]
+  product      Product            @relation(fields: [productId], references: [id])
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String     @unique
+  createdAt DateTime   @default(now())
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+}
+
+model CartItem {
+  id        String         @id @default(uuid())
+  cartId    String
+  variantId String
+  quantity  Int            @default(1)
+  cart      Cart           @relation(fields: [cartId], references: [id])
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@unique([cartId, variantId])
+}
+
+model Order {
+  id        String      @id @default(uuid())
+  userId    String
+  status    String
+  total     Decimal     @db.Decimal(10, 2)
+  createdAt DateTime    @default(now())
+  user      User        @relation(fields: [userId], references: [id])
+  items     OrderItem[]
+}
+
+model OrderItem {
+  id        String         @id @default(uuid())
+  orderId   String
+  variantId String
+  quantity  Int
+  price     Decimal        @db.Decimal(10, 2)
+  order     Order          @relation(fields: [orderId], references: [id])
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
 }
 
 enum WalletType {
@@ -18,91 +103,6 @@ enum AvailabilityStatus {
   IN_STOCK
   OUT_OF_STOCK
   PREORDER
-}
-
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  firebaseUid String?   @unique
-  name      String?
-  carts     Cart[]
-  orders    Order[]
-  createdAt DateTime @default(now())
-  role      Role     @default(CUSTOMER)
-}
-
-model Category {
-  id        String    @id @default(uuid())
-  name      String
-  products  Product[]
-  createdAt DateTime  @default(now())
-}
-
-model Product {
-  id          String           @id @default(uuid())
-  name        String
-  description String?
-  isActive    Boolean          @default(true)
-  categoryId  String
-  category    Category         @relation(fields: [categoryId], references: [id])
-  variants    ProductVariant[]
-  createdAt   DateTime         @default(now())
-}
-
-model ProductVariant {
-  id           String              @id @default(uuid())
-  productId    String
-  product      Product             @relation(fields: [productId], references: [id])
-
-  color        String
-  texture      String
-  walletType   WalletType
-  price        Decimal             @db.Decimal(10, 2)
-  stock        Int                 @default(0)
-  availability AvailabilityStatus
-  sku          String?             @unique
-  imgSrc       String?             // 👈 moved here
-  cartItems    CartItem[]
-  orderItems   OrderItem[]
-  createdAt    DateTime            @default(now())
-}
-model Cart {
-  id        String     @id @default(uuid())
-  userId    String     @unique
-  user      User       @relation(fields: [userId], references: [id])
-  items     CartItem[]
-  createdAt DateTime   @default(now())
-}
-
-model CartItem {
-  id        String         @id @default(uuid())
-  cartId   String
-  cart     Cart           @relation(fields: [cartId], references: [id])
-  variantId String
-  variant   ProductVariant @relation(fields: [variantId], references: [id])
-  quantity Int             @default(1)
-
-  @@unique([cartId, variantId])
-}
-
-model Order {
-  id        String      @id @default(uuid())
-  userId    String
-  user      User        @relation(fields: [userId], references: [id])
-  items     OrderItem[]
-  status    String
-  total     Decimal     @db.Decimal(10, 2)
-  createdAt DateTime    @default(now())
-}
-
-model OrderItem {
-  id         String          @id @default(uuid())
-  orderId   String
-  order     Order           @relation(fields: [orderId], references: [id])
-  variantId String
-  variant   ProductVariant  @relation(fields: [variantId], references: [id])
-  quantity  Int
-  price     Decimal         @db.Decimal(10, 2)
 }
 
 enum Role {
