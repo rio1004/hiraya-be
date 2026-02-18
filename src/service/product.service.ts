@@ -1,4 +1,10 @@
-import { AvailabilityStatusValues, type AvailabilityStatus, type WalletType } from "../types/enum.js";
+import {
+  AvailabilityStatusValues,
+  type AvailabilityStatus,
+  type WalletType,
+} from "../types/enum.js";
+import type { Product, ProductVariant } from "@prisma/client";
+
 import prisma from "../util/prisma.js";
 
 export const ProductService = {
@@ -112,16 +118,18 @@ export const ProductService = {
       },
     });
 
-    const productsWithColors = products.map((product) => {
-      const colors = [
-        ...new Set(product.variants.map((variant) => variant.color)),
-      ];
+    const productsWithColors = products.map(
+      (product: Product & { variants: ProductVariant[] }) => {
+        const colors = [
+          ...new Set(product.variants.map((variant) => variant.color)),
+        ];
 
-      return {
-        ...product,
-        colors,
-      };
-    });
+        return {
+          ...product,
+          colors,
+        };
+      },
+    );
 
     const totalProducts = await prisma.product.count({ where });
 
