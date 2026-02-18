@@ -121,7 +121,7 @@ export const ProductService = {
     const productsWithColors = products.map(
       (product: Product & { variants: ProductVariant[] }) => {
         const colors = [
-          ...new Set(product.variants.map((variant) => variant.color)),
+          ...new Set(product.variants.map((variant: ProductVariant) => variant.color)),
         ];
 
         return {
