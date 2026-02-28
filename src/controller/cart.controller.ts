@@ -29,8 +29,27 @@ export const CartController = {
         return res.status(401).json({ message: "Unauthorized" });
       }
       const userId = req.user.id;
-      res.status(200).json(await CartService.getCartItems(userId));
-    } catch (error) {}
+
+      let ids: string[] | undefined;
+
+      if (
+        req.body?.ids &&
+        Array.isArray(req.body.ids) &&
+        req.body.ids.length > 0
+      ) {
+        ids = req.body.ids;
+      }
+      else if (req.query?.ids && typeof req.query.ids === "string") {
+        ids = req.query.ids.split(",").filter(Boolean); // removes empty strings
+        if (ids.length === 0) ids = undefined;
+      }
+
+      const result = await CartService.getCartItems(userId, ids);
+      res.status(200).json(result);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error" });
+    }
   },
   async getCartQty(req: Request, res: Response) {
     try {

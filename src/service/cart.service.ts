@@ -77,11 +77,20 @@ export const CartService = {
       message: "Successfully added to the cart",
     };
   },
-  async getCartItems(userId: string) {
+  async getCartItems(userId: string, ids?: string[]) {
     const cart = await prisma.cart.findUnique({
       where: { userId },
       select: {
         items: {
+          ...(ids && ids.length > 0
+            ? {
+                where: {
+                  variantId: {
+                    in: ids,
+                  },
+                },
+              }
+            : {}),
           select: {
             variant: {
               select: {
