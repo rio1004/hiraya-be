@@ -77,6 +77,7 @@ model Order {
   userId    String
   status    String
   total     Decimal     @db.Decimal(10, 2)
+  deliveryFee  Decimal?    @db.Decimal(10, 2)
   createdAt DateTime    @default(now())
   user      User        @relation(fields: [userId], references: [id])
   items     OrderItem[]
