@@ -11,6 +11,9 @@ model User {
   id          String   @id @default(uuid())
   email       String   @unique
   name        String?
+  firstName   String? 
+  LastName    String? 
+  mobile      String? 
   createdAt   DateTime @default(now())
   firebaseUid String?  @unique
   role        Role     @default(CUSTOMER)
@@ -51,6 +54,14 @@ model ProductVariant {
   cartItems    CartItem[]
   orderItems   OrderItem[]
   product      Product            @relation(fields: [productId], references: [id])
+}
+
+model Address {
+  id          String             @id @default(uuid())
+  fullAddress String
+  province    String
+  city        String
+  brgy        String
 }
 
 model Cart {
