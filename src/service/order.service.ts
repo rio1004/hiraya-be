@@ -1,13 +1,47 @@
 import prisma from "../util/prisma.js";
 import { Prisma } from "@prisma/client";
+import { AddressService } from "./address.service.js";
 
 export const OrderService = {
   async placeOrder(
     userId: string,
     items: Array<{ variantId: string; quantity: number }>,
     deliveryFee: number = 0,
+    addressInfo: { addressId?: number; newAddress?: any },
   ) {
     return await prisma.$transaction(async (tx) => {
+      let addressId = addressInfo.addressId;
+
+      // Handle new address creation if provided
+      if (!addressId && addressInfo.newAddress) {
+        // We reuse the logic from AddressService but use the current transaction
+        // Since AddressService.createAddress uses its own transaction, 
+        // we'll manually implement it here for atomic safety.
+
+        if (addressInfo.newAddress.isDefault) {
+          await tx.address.updateMany({
+            where: { userId, isDefault: true },
+            data: { isDefault: false },
+          });
+        }
+
+        const addressCount = await tx.address.count({ where: { userId } });
+        const isDefault = addressCount === 0 ? true : !!addressInfo.newAddress.isDefault;
+
+        const createdAddress = await tx.address.create({
+          data: {
+            ...addressInfo.newAddress,
+            userId,
+            isDefault,
+          },
+        });
+        addressId = createdAddress.id;
+      }
+
+      if (!addressId) {
+        throw new Error("An address is required to place an order");
+      }
+
       let totalAmount = new Prisma.Decimal(0);
       const orderItemsData = [];
 
@@ -24,6 +58,7 @@ export const OrderService = {
           throw new Error(`Insufficient stock for variant ${variant.id}`);
         }
 
+        // Update stock
         await tx.productVariant.update({
           where: { id: item.variantId },
           data: {
@@ -48,6 +83,7 @@ export const OrderService = {
       const order = await tx.order.create({
         data: {
           userId,
+          addressId,
           status: "PENDING",
           total: totalAmount,
           deliveryFee: new Prisma.Decimal(deliveryFee),
@@ -57,6 +93,7 @@ export const OrderService = {
         },
         include: {
           items: true,
+          address: true,
         },
       });
 
@@ -76,9 +113,10 @@ export const OrderService = {
   },
 
   async getOrdersByUser(userId: string) {
-    const orders = await prisma.order.findMany({
+    return prisma.order.findMany({
       where: { userId },
       include: {
+        address: true,
         items: {
           include: {
             variant: {
@@ -93,38 +131,13 @@ export const OrderService = {
         createdAt: "desc",
       },
     });
-
-    return orders.map((order) => {
-      const subTotal = order.items.reduce((sum, item) => {
-        return sum + Number(item.price) * item.quantity;
-      }, 0);
-
-      const deliveryFee = Number(order.deliveryFee ?? 0);
-
-      const totalPrice = subTotal + deliveryFee;
-
-      return {
-        subTotal,
-        deliveryFee,
-        totalPrice,
-        items: order.items.map((item) => ({
-          id: item.id,
-          quantity: item.quantity,
-          price: Number(item.price),
-          productName: item.variant.product.name,
-          color: item.variant.color,
-          texture: item.variant.texture,
-          walletType: item.variant.walletType,
-          image: item.variant.imgSrc,
-        })),
-      };
-    });
   },
 
   async getOrderById(orderId: string, userId: string) {
     return prisma.order.findFirst({
       where: { id: orderId, userId },
       include: {
+        address: true,
         items: {
           include: {
             variant: {

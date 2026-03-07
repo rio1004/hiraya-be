@@ -4,7 +4,7 @@ import { OrderService } from "../service/order.service.js";
 export const OrderController = {
   async createOrder(req: Request, res: Response) {
     try {
-      const { items, deliveryFee } = req.body;
+      const { items, deliveryFee, addressId, newAddress } = req.body;
       const userId = req.user?.id;
 
       if (!userId) {
@@ -15,6 +15,10 @@ export const OrderController = {
         return res.status(400).json({ message: "Invalid items provided" });
       }
 
+      if (!addressId && !newAddress) {
+        return res.status(400).json({ message: "An existing addressId or newAddress is required" });
+      }
+
       // Basic validation for items
       for (const item of items) {
         if (!item.variantId || typeof item.quantity !== "number" || item.quantity <= 0) {
@@ -22,7 +26,24 @@ export const OrderController = {
         }
       }
 
-      const order = await OrderService.placeOrder(userId, items, deliveryFee);
+      // Basic validation for newAddress if provided
+      if (!addressId && newAddress) {
+        const {
+          barangayCode,
+          cityCode,
+          contactName,
+          contactPhone,
+          postalCode,
+          regionCode,
+          fullAddress,
+        } = newAddress;
+
+        if (!barangayCode || !cityCode || !contactName || !contactPhone || !postalCode || !regionCode || !fullAddress) {
+          return res.status(400).json({ message: "Missing required fields in newAddress" });
+        }
+      }
+
+      const order = await OrderService.placeOrder(userId, items, deliveryFee, { addressId, newAddress });
       res.status(201).json(order);
     } catch (error: any) {
       console.error("Error creating order:", error);
