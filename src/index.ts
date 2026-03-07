@@ -11,6 +11,7 @@ import cartRoutes from "./routes/cart.routes.js";
 import productVariantRoutes from "./routes/product-variant.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import locationRoutes from "./routes/location.routes.js";
+import addressRoutes from "./routes/address.routes.js";
 const app: Application = express();
 const port: number = 4000;
 
@@ -29,6 +30,7 @@ app.use("/product-variant", productVariantRoutes);
 app.use("/auth", authRoutes);
 app.use("/orders", orderRoutes);
 app.use("/locations", locationRoutes);
+app.use("/addresses", addressRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, World!");

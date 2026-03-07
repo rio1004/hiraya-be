@@ -61,16 +61,15 @@ model ProductVariant {
 
 model Address {
   barangayCode String
-  building     String?
   cityCode     String
   contactName  String
   contactPhone String
+  fullAddress  String
   createdAt    DateTime  @default(now())
   isDefault    Boolean   @default(false)
   postalCode   String
   provinceCode String?
   regionCode   String
-  street       String
   userId       String
   id           Int       @id @default(autoincrement())
   barangay     Barangay  @relation(fields: [barangayCode], references: [code])

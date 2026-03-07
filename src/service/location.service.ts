@@ -35,7 +35,6 @@ export const LocationService = {
     });
   },
 
-  // City
   async getCitiesByProvince(provinceCode: string) {
     return prisma.city.findMany({
       where: { provinceCode },
@@ -59,7 +58,6 @@ export const LocationService = {
     });
   },
 
-  // Barangay
   async getBarangaysByCity(cityCode: string) {
     return prisma.barangay.findMany({
       where: { cityCode },

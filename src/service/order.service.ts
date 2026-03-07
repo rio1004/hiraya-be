@@ -24,7 +24,6 @@ export const OrderService = {
           throw new Error(`Insufficient stock for variant ${variant.id}`);
         }
 
-        // Update stock
         await tx.productVariant.update({
           where: { id: item.variantId },
           data: {
