@@ -8,15 +8,16 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(uuid())
-  email       String   @unique
+  id          String    @id @default(uuid())
+  email       String    @unique
   name        String?
-  firstName   String? 
-  LastName    String? 
-  mobile      String? 
-  createdAt   DateTime @default(now())
-  firebaseUid String?  @unique
-  role        Role     @default(CUSTOMER)
+  createdAt   DateTime  @default(now())
+  firebaseUid String?   @unique
+  role        Role      @default(CUSTOMER)
+  firstName   String?
+  mobile      String?
+  lastName    String?
+  addresses   Address[]
   carts       Cart?
   orders      Order[]
 }
@@ -54,14 +55,116 @@ model ProductVariant {
   cartItems    CartItem[]
   orderItems   OrderItem[]
   product      Product            @relation(fields: [productId], references: [id])
+
+  @@index([productId])
 }
 
 model Address {
-  id          String             @id @default(uuid())
-  fullAddress String
-  province    String
-  city        String
-  brgy        String
+  barangayCode String
+  building     String?
+  cityCode     String
+  contactName  String
+  contactPhone String
+  createdAt    DateTime  @default(now())
+  isDefault    Boolean   @default(false)
+  postalCode   String
+  provinceCode String?
+  regionCode   String
+  street       String
+  userId       String
+  id           Int       @id @default(autoincrement())
+  barangay     Barangay  @relation(fields: [barangayCode], references: [code])
+  city         City      @relation(fields: [cityCode], references: [code])
+  province     Province? @relation(fields: [provinceCode], references: [code])
+  region       Region    @relation(fields: [regionCode], references: [code])
+  user         User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model ShippingFee {
+  id     Int          @id @default(autoincrement())
+  zoneId Int
+  fee    Decimal
+  zone   ShippingZone @relation(fields: [zoneId], references: [id])
+}
+
+model RegionZone {
+  id         Int          @id @default(autoincrement())
+  zoneId     Int
+  regionCode String
+  region     Region       @relation(fields: [regionCode], references: [code])
+  zone       ShippingZone @relation(fields: [zoneId], references: [id])
+
+  @@unique([zoneId, regionCode])
+}
+
+model ShippingZone {
+  id           Int           @id @default(autoincrement())
+  name         String
+  regions      RegionZone[]
+  shippingFees ShippingFee[]
+}
+
+model Region {
+  name        String
+  code        String       @id
+  createdAt   DateTime     @default(now())
+  addresses   Address[]
+  cities      City[]
+  provinces   Province[]
+  regionZones RegionZone[]
+}
+
+model PostalCode {
+  id           Int       @id @default(autoincrement())
+  code         String
+  cityCode     String
+  barangayCode String?
+  barangay     Barangay? @relation(fields: [barangayCode], references: [code])
+  city         City      @relation(fields: [cityCode], references: [code])
+
+  @@index([code])
+}
+
+model Province {
+  name       String
+  code       String    @id
+  createdAt  DateTime  @default(now())
+  regionCode String
+  addresses  Address[]
+  cities     City[]
+  region     Region    @relation(fields: [regionCode], references: [code])
+
+  @@index([regionCode])
+}
+
+model City {
+  name         String
+  code         String       @id
+  createdAt    DateTime     @default(now())
+  provinceCode String?
+  regionCode   String
+  addresses    Address[]
+  barangays    Barangay[]
+  province     Province?    @relation(fields: [provinceCode], references: [code])
+  region       Region       @relation(fields: [regionCode], references: [code])
+  postalCodes  PostalCode[]
+
+  @@index([provinceCode])
+  @@index([regionCode])
+}
+
+model Barangay {
+  name        String
+  cityCode    String
+  code        String       @id
+  createdAt   DateTime     @default(now())
+  addresses   Address[]
+  city        City         @relation(fields: [cityCode], references: [code])
+  postalCodes PostalCode[]
+
+  @@index([cityCode])
 }
 
 model Cart {
@@ -81,17 +184,20 @@ model CartItem {
   variant   ProductVariant @relation(fields: [variantId], references: [id])
 
   @@unique([cartId, variantId])
+  @@index([variantId])
 }
 
 model Order {
-  id        String      @id @default(uuid())
-  userId    String
-  status    String
-  total     Decimal     @db.Decimal(10, 2)
-  deliveryFee  Decimal?    @db.Decimal(10, 2)
-  createdAt DateTime    @default(now())
-  user      User        @relation(fields: [userId], references: [id])
-  items     OrderItem[]
+  id          String      @id @default(uuid())
+  userId      String
+  total       Decimal     @db.Decimal(10, 2)
+  createdAt   DateTime    @default(now())
+  deliveryFee Decimal?    @db.Decimal(10, 2)
+  status      OrderStatus
+  user        User        @relation(fields: [userId], references: [id])
+  items       OrderItem[]
+
+  @@index([userId])
 }
 
 model OrderItem {
@@ -102,6 +208,9 @@ model OrderItem {
   price     Decimal        @db.Decimal(10, 2)
   order     Order          @relation(fields: [orderId], references: [id])
   variant   ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@index([orderId])
+  @@index([variantId])
 }
 
 enum WalletType {
@@ -120,4 +229,13 @@ enum AvailabilityStatus {
 enum Role {
   CUSTOMER
   ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }

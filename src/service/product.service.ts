@@ -142,7 +142,6 @@ export const ProductService = {
     };
   },
 
-  // Get a single product by ID
   async getProductById(id: string) {
     return prisma.product.findUnique({
       where: { id },

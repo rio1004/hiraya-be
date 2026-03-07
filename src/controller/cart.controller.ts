@@ -43,8 +43,9 @@ export const CartController = {
         ids = req.query.ids.split(",").filter(Boolean); // removes empty strings
         if (ids.length === 0) ids = undefined;
       }
-
+      console.log(ids)
       const result = await CartService.getCartItems(userId, ids);
+      console.log(result)
       res.status(200).json(result);
     } catch (error) {
       console.error(error);
