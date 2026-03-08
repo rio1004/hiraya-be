@@ -17,9 +17,16 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^25.3.5",
+    "@types/supertest": "^7.2.0",
+    "cross-env": "^10.1.0",
+    "jest": "^30.2.0",
     "nodemon": "^3.1.11",
     "prisma": "^7.3.0",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"
@@ -28,7 +35,8 @@
     "build": "prisma generate && tsc",
     "dev": "nodemon --watch src --ext ts --exec \"tsc && node --enable-source-maps --import dotenv/config dist/index.js\"",
     "start": "node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:api": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/api.test.ts"
   },
   "keywords": [],
   "author": "",

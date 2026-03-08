@@ -1,11 +1,16 @@
 import type { Request, Response } from "express";
 import { CartService } from "../service/cart.service.js";
+import type {
+  AddToCartInput,
+  DeleteCartItemParams,
+  UpdateCartQtyInput,
+} from "../types/cart.type.js";
 
 export const CartController = {
   async addToCart(req: Request, res: Response) {
     try {
-      const { variantId, quantity = 1 } = req.body;
-      const userId = req.user.id;
+      const { variantId, quantity = 1 } = req.body as AddToCartInput;
+      const userId = (req as any).user.id;
 
       const cart = await CartService.addToCart(userId, variantId, quantity);
 
@@ -25,10 +30,7 @@ export const CartController = {
   },
   async getCartItems(req: Request, res: Response) {
     try {
-      if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-      const userId = req.user.id;
+      const userId = (req as any).user.id;
 
       let ids: string[] | undefined;
 
@@ -38,14 +40,11 @@ export const CartController = {
         req.body.ids.length > 0
       ) {
         ids = req.body.ids;
-      }
-      else if (req.query?.ids && typeof req.query.ids === "string") {
+      } else if (req.query?.ids && typeof req.query.ids === "string") {
         ids = req.query.ids.split(",").filter(Boolean); // removes empty strings
         if (ids.length === 0) ids = undefined;
       }
-      console.log(ids)
       const result = await CartService.getCartItems(userId, ids);
-      console.log(result)
       res.status(200).json(result);
     } catch (error) {
       console.error(error);
@@ -54,29 +53,23 @@ export const CartController = {
   },
   async getCartQty(req: Request, res: Response) {
     try {
-      if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const userId = req.user.id;
+      const userId = (req as any).user.id;
       const qty = await CartService.getCartQty(userId);
 
       res.status(200).json({ qty });
-    } catch (error) {}
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
   },
   async updateCartQty(req: Request, res: Response) {
     try {
-      if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-      const { variantId, quantity = 1 } = req.body;
-      const userId = req.user.id;
+      const { variantId, quantity = 1 } = req.body as UpdateCartQtyInput;
+      const userId = (req as any).user.id;
       const cart = await CartService.updateCartItemQty(
         userId,
         variantId,
         quantity,
       );
-      console.log(cart);
       res.status(200).json({ cart });
     } catch (error: any) {
       if (error.message === "Variant not found") {
@@ -85,22 +78,18 @@ export const CartController = {
       if (error.message === "Not enough stock") {
         return res.status(400).json({ message: error.message });
       }
+      res.status(500).json({ message: "Internal server error" });
     }
   },
   async deleteCartItem(req: Request, res: Response) {
     try {
-      if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-      const { variantId } = req.params;
-      if (!variantId || typeof variantId !== "string") {
-        return res.status(400).json({ message: "Invalid variantId" });
-      }
-
-      const userId = req.user.id;
+      const { variantId } = req.params as unknown as DeleteCartItemParams;
+      const userId = (req as any).user.id;
       const deletedItem = await CartService.deleteCartItem(userId, variantId);
 
       res.status(200).json({ success: true, deletedItem });
-    } catch (error) {}
+    } catch (error: any) {
+      res.status(500).json({ message: "Internal server error" });
+    }
   },
 };

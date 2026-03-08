@@ -9,7 +9,7 @@ export const OrderService = {
     deliveryFee: number = 0,
     addressInfo: { addressId?: number; newAddress?: any },
   ) {
-    return await prisma.$transaction(async (tx) => {
+    return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       let addressId = addressInfo.addressId;
 
       // Handle new address creation if provided

@@ -13,6 +13,7 @@ import orderRoutes from "./routes/order.routes.js";
 import locationRoutes from "./routes/location.routes.js";
 import addressRoutes from "./routes/address.routes.js";
 const app: Application = express();
+export { app };
 const port: number = 4000;
 
 app.use(cors());
@@ -34,6 +35,18 @@ app.use("/addresses", addressRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, World!");
+});
+
+app.use((err: any, req: Request, res: Response, next: any) => {
+  console.error("Global Error Handler (Full Trace):", err);
+  if (err.stack) {
+    console.error(err.stack);
+  }
+  res.status(500).json({ 
+    message: "Internal server error", 
+    error: err.message,
+    stack: process.env.NODE_ENV === "development" ? err.stack : undefined 
+  });
 });
 
 app.listen(port, () => {

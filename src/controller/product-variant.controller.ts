@@ -1,14 +1,27 @@
 import type { Request, Response } from "express";
 import { ProductVariantService } from "../service/product-variant.service.js";
+import type { AddProductVariantInput } from "../types/product-variant.type.js";
 
 export const ProductVariantController = {
   async addProductVariant(req: Request, res: Response) {
     try {
-      const { variant, productId } = req.body;
+      const { variant, productId } = req.body as AddProductVariantInput;
 
-      const newProductVariant = ProductVariantService.addProductVariant(
+      const cleanedVariant: any = {
+        color: variant.color,
+        texture: variant.texture,
+        walletType: variant.walletType,
+        price: variant.price,
+        stock: variant.stock,
+        availability: variant.availability,
+      };
+      if (variant.sku !== undefined) cleanedVariant.sku = variant.sku;
+      if (variant.imgSrc !== undefined)
+        cleanedVariant.imgSrc = variant.imgSrc ?? undefined;
+
+      const newProductVariant = await ProductVariantService.addProductVariant(
         productId,
-        variant,
+        cleanedVariant,
       );
 
       res.status(201).json(newProductVariant);
@@ -20,4 +33,3 @@ export const ProductVariantController = {
     }
   },
 };
-

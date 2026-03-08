@@ -156,3 +156,4 @@ serviceAccountKey.json
 
 # Compiled output
 /dist
+export_data

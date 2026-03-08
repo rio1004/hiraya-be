@@ -1,62 +1,37 @@
 import type { Request, Response } from "express";
 import { ProductService } from "../service/product.service.js";
-import { AvailabilityStatusValues, WalletTypeValues, type WalletType } from "../types/enum.js";
+import type {
+  CreateProductInput,
+  GetProductsQuery,
+  ProductParams,
+  UpdateProductInput,
+} from "../types/product.type.js";
 
 export const ProductController = {
   async createProduct(req: Request, res: Response) {
     try {
-      const { name, description, categoryId, variants } = req.body;
-      if (!name || !categoryId || !variants || !Array.isArray(variants)) {
-        return res.status(400).json({
-          message: "Missing required product fields or variants array",
-        });
-      }
+      const { name, description, categoryId, variants } =
+        req.body as CreateProductInput;
 
-      // Basic validation for variants
-      for (const variant of variants) {
-        if (
-          !variant.color ||
-          !variant.texture ||
-          !variant.walletType ||
-          typeof variant.price !== "number" ||
-          typeof variant.stock !== "number" ||
-          !variant.availability
-        ) {
-          return res
-            .status(400)
-            .json({ message: "Invalid variant data provided" });
-        }
-        if (!Object.values(WalletTypeValues).includes(variant.walletType)) {
-          return res
-            .status(400)
-            .json({ message: `Invalid WalletType: ${variant.walletType}` });
-        }
-        if (
-          !Object.values(AvailabilityStatusValues).includes(
-            variant.availability,
-          )
-        ) {
-          return res.status(400).json({
-            message: `Invalid AvailabilityStatus: ${variant.availability}`,
-          });
-        }
-        // Ensure imgSrc is part of the variant if present
-        if (
-          variant.imgSrc !== undefined &&
-          typeof variant.imgSrc !== "string" &&
-          variant.imgSrc !== null
-        ) {
-          return res
-            .status(400)
-            .json({ message: "Invalid imgSrc type in variant" });
-        }
-      }
+      const mappedVariants = variants.map((v) => {
+        const variant: any = {
+          color: v.color,
+          texture: v.texture,
+          walletType: v.walletType,
+          price: v.price,
+          stock: v.stock,
+          availability: v.availability,
+        };
+        if (v.sku !== undefined) variant.sku = v.sku;
+        if (v.imgSrc !== undefined) variant.imgSrc = v.imgSrc ?? undefined;
+        return variant;
+      });
 
       const newProduct = await ProductService.createProduct(
         name,
-        description,
+        description ?? null,
         categoryId,
-        variants,
+        mappedVariants,
       );
       res.status(201).json(newProduct);
     } catch (error: any) {
@@ -69,9 +44,20 @@ export const ProductController = {
 
   async getProducts(req: Request, res: Response) {
     try {
-      const {
-        page = "1",
-        pageSize = "10",
+      const page = req.query.page ? parseInt(req.query.page as string) : 1;
+      const pageSize = req.query.pageSize ? parseInt(req.query.pageSize as string) : 10;
+      const search = req.query.search as string | undefined;
+      const categoryId = req.query.categoryId as string | undefined;
+      const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice as string) : undefined;
+      const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined;
+      const inStock = req.query.inStock === "true" ? true : req.query.inStock === "false" ? false : undefined;
+      const walletType = req.query.walletType as any;
+      const color = req.query.color as string | undefined;
+      const texture = req.query.texture as string | undefined;
+
+      const products = await ProductService.getProducts(
+        page,
+        pageSize,
         search,
         categoryId,
         minPrice,
@@ -80,22 +66,10 @@ export const ProductController = {
         walletType,
         color,
         texture,
-      } = req.query;
-
-      const products = await ProductService.getProducts(
-        parseInt(page as string),
-        parseInt(pageSize as string),
-        search as string,
-        categoryId as string,
-        minPrice ? parseFloat(minPrice as string) : undefined,
-        maxPrice ? parseFloat(maxPrice as string) : undefined,
-        inStock ? String(inStock).toLowerCase() === "true" : undefined,
-        walletType as WalletType,
-        color as string,
-        texture as string,
       );
       res.status(200).json(products);
     } catch (error: any) {
+
       console.error("Error fetching products:", error);
       res
         .status(500)
@@ -105,10 +79,7 @@ export const ProductController = {
 
   async getProductById(req: Request, res: Response) {
     try {
-      const { id } = req.params;
-      if (typeof id !== "string") {
-        return res.status(400).json({ message: "Invalid product ID provided" });
-      }
+      const { id } = req.params as unknown as ProductParams;
       const product = await ProductService.getProductById(id);
 
       if (!product) {
@@ -125,56 +96,32 @@ export const ProductController = {
 
   async updateProduct(req: Request, res: Response) {
     try {
-      const { id } = req.params;
-      if (typeof id !== "string") {
-        return res.status(400).json({ message: "Invalid product ID provided" });
-      }
-      const { name, description, isActive, categoryId, variants } = req.body;
+      const { id } = req.params as unknown as ProductParams;
+      const { name, description, isActive, categoryId, variants } =
+        req.body as UpdateProductInput["body"];
 
-      if (variants && !Array.isArray(variants)) {
-        return res.status(400).json({ message: "Variants must be an array" });
-      }
-
-      if (variants) {
-        for (const variant of variants) {
-          if (
-            variant.walletType &&
-            !Object.values(WalletTypeValues).includes(variant.walletType)
-          ) {
-            return res
-              .status(400)
-              .json({ message: `Invalid WalletType: ${variant.walletType}` });
-          }
-          if (
-            variant.availability &&
-            !Object.values(AvailabilityStatusValues).includes(
-              variant.availability,
-            )
-          ) {
-            return res.status(400).json({
-              message: `Invalid AvailabilityStatus: ${variant.availability}`,
-            });
-          }
-          // Ensure imgSrc is part of the variant if present
-          if (
-            variant.imgSrc !== undefined &&
-            typeof variant.imgSrc !== "string" &&
-            variant.imgSrc !== null
-          ) {
-            return res
-              .status(400)
-              .json({ message: "Invalid imgSrc type in variant" });
-          }
-        }
-      }
+      const mappedVariants = variants?.map((v) => {
+        const variant: any = {
+          color: v.color,
+          texture: v.texture,
+          walletType: v.walletType,
+          price: v.price,
+          stock: v.stock,
+          availability: v.availability,
+        };
+        if (v.id !== undefined) variant.id = v.id;
+        if (v.sku !== undefined) variant.sku = v.sku;
+        if (v.imgSrc !== undefined) variant.imgSrc = v.imgSrc ?? undefined;
+        return variant;
+      });
 
       const updatedProduct = await ProductService.updateProduct(
         id,
         name,
-        description,
+        description ?? null,
         isActive,
         categoryId,
-        variants,
+        mappedVariants,
       );
 
       if (!updatedProduct) {
@@ -193,10 +140,7 @@ export const ProductController = {
 
   async deleteProduct(req: Request, res: Response) {
     try {
-      const { id } = req.params;
-      if (typeof id !== "string") {
-        return res.status(400).json({ message: "Invalid product ID provided" });
-      }
+      const { id } = req.params as unknown as ProductParams;
       const deletedProduct = await ProductService.deleteProduct(id);
 
       if (!deletedProduct) {
